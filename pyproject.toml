@@ -1,0 +1,18 @@
+[project]
+name = "mynotetaking"
+version = "0.2.0"
+description = "A note-taking app with AI translation"
+requires-python = ">=3.11"
+dependencies = [
+  "flask>=3.1,<4",
+  "flask-sqlalchemy>=3.1,<4",
+  "httpx>=0.28,<1",
+  "psycopg[binary]>=3.2,<4",
+  "python-dotenv>=1,<2",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
