@@ -1,17 +1,17 @@
 # 笔记翻译作业：配置与部署
 
-本地实现已完成。2026-10-05 已接通真实 Supabase 并初始化笔记表，真实数据库和 OpenRouter 的端到端测试通过。Vercel 上线和公网截图仍需补齐部署账户配置后验证。
+2026-10-05 已通过 Vercel CLI 上线：[Margin AI NoteTaker](https://ai-notetaker-three.vercel.app)。无需登录即可访问，真实 Supabase 与 OpenRouter 的公网端到端测试通过。项目 ID 已写入本地 `.env`；认证使用 Vercel CLI 的本机登录状态。
 
 ## 需要你提供的值
 
-直接填写项目根目录的 `.env`，已有 OpenRouter 与 Supabase 配置已保存；缺少的 Vercel 值留空。
+本项目的 `.env` 已配置完成；下面说明可用于换账号或重建部署。
 
 下面的 Vercel Token 与 ID 是供本地 `manage.py deploy` 自动部署脚本使用的。通过 Vercel 网页导入 GitHub 仓库部署时，不需要在本地填写这些字段。
 
 | 字段 | 需要什么 | 在哪里获取 |
 | --- | --- | --- |
 | `DATABASE_URL` | **已配置并验证**，包含实际数据库密码 | 使用 Supabase **Transaction pooler**，端口 `6543` |
-| `VERCEL_TOKEN` | 可访问目标项目的 Vercel Token | <https://vercel.com/account/tokens> |
+| `VERCEL_TOKEN` | **可选**：CLI 已登录时留空；无人值守环境可使用 Token | <https://vercel.com/account/tokens> |
 | `VERCEL_ORG_ID` | 项目所属账号或团队的 ID | 执行 Vercel `link` 后生成的 `.vercel/project.json` 中的 `orgId`；团队也可在 Team Settings 中查到 |
 | `VERCEL_PROJECT_ID` | 目标 Vercel 项目的 ID | Project Settings → General → Project ID，或 `.vercel/project.json` 的 `projectId` |
 | `APP_URL` | 最终可公开访问的应用 URL | 部署命令成功后自动填入；如使用固定生产域名，可再改成该域名 |
@@ -27,7 +27,7 @@ pnpm dlx vercel@62.1.0 login
 pnpm dlx vercel@62.1.0 link
 ```
 
-运行位置是本项目根目录。将生成的 `orgId`、`projectId` 填进 `.env`，再填入 Token，即可使用下面的部署工具。
+运行位置是本项目根目录。将生成的 `orgId`、`projectId` 填进 `.env`，已登录的 CLI 不需要 Token，即可使用下面的部署工具。
 
 ## 填好后的操作
 

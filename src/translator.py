@@ -39,6 +39,10 @@ def translate_note(title, content, target_language):
         result = json.loads(raw)
         if not isinstance(result, dict) or not all(isinstance(result.get(k), str) for k in ('title', 'content')):
             raise ValueError('Invalid translation JSON')
+        # Some models double-escape paragraph breaks. Repair only when the source
+        # has real newlines and no literal escape sequences of its own.
+        if '\n' in content and '\\n' not in content and '\n' not in result['content'] and '\\n' in result['content']:
+            result['content'] = result['content'].replace('\\r\\n', '\n').replace('\\n', '\n')
         if len(result['title']) > 200 or len(result['content']) > 50000 or not (result['title'].strip() or result['content'].strip()):
             raise ValueError('Translation cannot be saved as a note')
         return {'title': result['title'], 'content': result['content'], 'target_language': language}

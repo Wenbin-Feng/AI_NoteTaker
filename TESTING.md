@@ -1,5 +1,16 @@
 # Test record
 
+## Public Vercel deployment (2026-10-05)
+
+- Public URL: https://ai-notetaker-three.vercel.app
+- Deployment created through Vercel CLI 62.1.0 with the Flask framework preset. Vercel Authentication was disabled on this project for public course access.
+- `uv run python manage.py smoke --translate`: **passed against the public URL with real Supabase and real OpenRouter**. UI/assets, database health, note CRUD/search, input validation, translation, save-as-new, original preservation, and deletion passed. Temporary test notes were removed.
+- Browser verification: autosaved a note on the public app and received a real Chinese translation. The observed model double-escaped paragraph breaks; the translator now repairs this when the source contains real newlines and no literal backslash-n sequences.
+- `uv run pytest -q`: **28 passed**, including CLI-login deployment authentication and paragraph-break regression cases.
+- Browser assets contain no configured credentials; requests for `.env`, `.env.local`, `.vercel/project.json`, and server source return 404.
+- Final Task 1 PDF contains the public URL and production screenshot, with two pages visually reviewed.
+- Earlier pending-deployment statements below are historical test records.
+
 ## Supabase connection attempt (2026-10-05)
 
 The supplied direct Postgres URI initially failed because it resolves to an IPv6 address only and this machine reported `No route to host`. The user then supplied the Transaction pooler template. The ignored `.env` now uses the pooler on port 6543, the previously supplied password, and `sslmode=require`.

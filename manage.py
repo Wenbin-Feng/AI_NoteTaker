@@ -27,6 +27,9 @@ def check_config(live=False):
     missing = []
     for key in DEPLOY_KEYS:
         present = bool(os.getenv(key, '').strip())
+        if key == 'VERCEL_TOKEN' and not present:
+            print('VERCEL_TOKEN: empty — using Vercel CLI login')
+            continue
         print(f'{key}: {"configured" if present else "EMPTY — needed for deployment"}')
         if not present:
             missing.append(key)
@@ -83,7 +86,7 @@ def deploy():
     finally:
         engine.dispose()
     prefix = vercel_command()
-    token = os.environ['VERCEL_TOKEN'].strip()
+    token = os.getenv('VERCEL_TOKEN', '').strip()
     organization = os.environ['VERCEL_ORG_ID'].strip()
     project = os.environ['VERCEL_PROJECT_ID'].strip()
     link = ROOT_DIR / '.vercel' / 'project.json'
@@ -97,7 +100,8 @@ def deploy():
 
     def run(arguments, value=None):
         # Values go through stdin, never through an echoed shell command.
-        result = subprocess.run(prefix + arguments + ['--token', token],
+        authentication = ['--token', token] if token else []
+        result = subprocess.run(prefix + arguments + authentication,
                                 cwd=ROOT_DIR, input=value, text=True,
                                 capture_output=True, timeout=600)
         if result.returncode:

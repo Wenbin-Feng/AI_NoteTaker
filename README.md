@@ -4,6 +4,8 @@ A polished note-taking app based on [HKPolyUSE/MyNoteTaking](https://github.com/
 
 Project repository: [Wenbin-Feng/AI_NoteTaker](https://github.com/Wenbin-Feng/AI_NoteTaker).
 
+Public application: [Margin AI NoteTaker](https://ai-notetaker-three.vercel.app).
+
 ## Run locally with uv
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).

@@ -118,3 +118,15 @@ def test_database_write_failure_retains_existing_note(client):
     assert result.status_code == 500
     assert 'password' not in result.get_data(as_text=True)
     assert client.get(f'/api/notes/{note["id"]}').json == note
+
+
+@pytest.mark.parametrize('source,expected', [('First\n\nSecond', '第一段\n\n第二段'),
+                                           ('Code contains \\n\nSecond', '第一段\\n\\n第二段')])
+def test_translation_repairs_double_escaped_paragraphs_without_changing_literal_source(client, monkeypatch, source, expected):
+    monkeypatch.setenv('LLM_API_KEY', 'test-only-key')
+    response = httpx.Response(200, request=httpx.Request('POST', 'https://example.com'),
+                             json={'choices': [{'message': {'content': json.dumps({'title': '测试', 'content': '第一段\\n\\n第二段'})}}]})
+    with patch('src.translator.httpx.post', return_value=response):
+        result = client.post('/api/translate', json={'title': 'Hello', 'content': source, 'target_language': '简体中文'})
+    assert result.status_code == 200
+    assert result.json['content'] == expected

@@ -1,10 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "flask",
   "rewrites": [{"source": "/", "destination": "/index.html"}],
   "functions": {
     "app.py": {
       "maxDuration": 90,
-      "excludeFiles": "{tests/**,scripts/**,database/**,supabase/**,submission/**,api/**,.env*,.venv/**,.pytest_cache/**}"
+      "excludeFiles": "{tests/**,scripts/**,database/**,supabase/**,submission/**,output/**,api/**,.env*,.venv/**,.pytest_cache/**}"
     }
   }
 }

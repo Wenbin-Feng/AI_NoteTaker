@@ -46,9 +46,10 @@ def test_missing_configuration_is_reported_without_secrets(monkeypatch, capsys):
     assert 'not-for-output' not in output
 
 
-def test_deploy_syncs_only_runtime_values_using_stdin(monkeypatch, tmp_path, capsys):
+@pytest.mark.parametrize('with_token', [True, False])
+def test_deploy_syncs_only_runtime_values_using_stdin(monkeypatch, tmp_path, capsys, with_token):
     values = {'DATABASE_URL': 'postgresql://postgres:db-secret@localhost:6543/postgres',
-              'LLM_API_KEY': 'llm-secret', 'VERCEL_TOKEN': 'deployment-secret',
+              'LLM_API_KEY': 'llm-secret', 'VERCEL_TOKEN': 'deployment-secret' if with_token else '',
               'VERCEL_ORG_ID': 'team_test', 'VERCEL_PROJECT_ID': 'prj_test',
               'LLM_BASE_URL': 'https://openrouter.ai/api/v1', 'LLM_MODEL': 'test-model'}
     for key, value in values.items():
@@ -67,6 +68,7 @@ def test_deploy_syncs_only_runtime_values_using_stdin(monkeypatch, tmp_path, cap
     assert calls[1].kwargs['input'] == 'llm-secret'
     assert all('llm-secret' not in call.args[0] for call in calls)
     assert calls[-1].args[0][1:4] == ['deploy', '--prod', '--yes']
+    assert all(('--token' in call.args[0]) == with_token for call in calls)
     assert json.loads((tmp_path / '.vercel' / 'project.json').read_text())['projectId'] == 'prj_test'
     assert 'https://test-deploy.vercel.app' in (tmp_path / '.env').read_text()
     assert not any(secret in capsys.readouterr().out for secret in ('llm-secret', 'db-secret', 'deployment-secret'))
