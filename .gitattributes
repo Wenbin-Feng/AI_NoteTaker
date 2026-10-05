@@ -1,0 +1,3 @@
+# Generated artifacts are binary, including ASCII-encoded PDFs.
+*.pdf binary
+*.png binary
