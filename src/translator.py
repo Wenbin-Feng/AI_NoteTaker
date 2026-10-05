@@ -19,8 +19,8 @@ def translate_note(title, content, target_language):
     key = os.getenv('LLM_API_KEY', '').strip()
     if not key:
         raise TranslationError('Translation is not configured on this server', 503)
-    base_url = os.getenv('LLM_BASE_URL', 'https://openrouter.ai/api/v1').rstrip('/')
-    model = os.getenv('LLM_MODEL', 'nvidia/nemotron-3-ultra-550b-a55b:free')
+    base_url = (os.getenv('LLM_BASE_URL', '').strip() or 'https://openrouter.ai/api/v1').rstrip('/')
+    model = os.getenv('LLM_MODEL', '').strip() or 'nvidia/nemotron-3-ultra-550b-a55b:free'
     payload = {'model': model, 'temperature': 0.2,
                'messages': [
                    {'role': 'system', 'content': PROMPT.replace('{target_language}', language)},
@@ -28,7 +28,7 @@ def translate_note(title, content, target_language):
     try:
         response = httpx.post(f'{base_url}/chat/completions',
                               headers={'Authorization': f'Bearer {key}', 'Content-Type': 'application/json'},
-                              json=payload, timeout=60)
+                              json=payload, timeout=httpx.Timeout(50, connect=10))
         response.raise_for_status()
         raw = response.json()['choices'][0]['message']['content']
         if not isinstance(raw, str):
@@ -39,6 +39,8 @@ def translate_note(title, content, target_language):
         result = json.loads(raw)
         if not isinstance(result, dict) or not all(isinstance(result.get(k), str) for k in ('title', 'content')):
             raise ValueError('Invalid translation JSON')
+        if len(result['title']) > 200 or len(result['content']) > 50000 or not (result['title'].strip() or result['content'].strip()):
+            raise ValueError('Translation cannot be saved as a note')
         return {'title': result['title'], 'content': result['content'], 'target_language': language}
     except httpx.TimeoutException as exc:
         raise TranslationError('Translation timed out. Please try again.') from exc

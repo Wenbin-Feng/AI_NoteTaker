@@ -111,3 +111,6 @@ Thumbs.db
 .coverage
 coverage.xml
 *.prof
+
+# Vercel local project link
+.vercel/

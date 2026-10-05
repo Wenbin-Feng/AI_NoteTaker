@@ -2,6 +2,8 @@
 
 A polished note-taking app based on [HKPolyUSE/MyNoteTaking](https://github.com/HKPolyUSE/MyNoteTaking). Notes support create, edit, delete, search and auto-save. The translation studio uses OpenRouter on the server, returns structured JSON, and lets you copy or save a translation as a new note.
 
+Project repository: [Wenbin-Feng/AI_NoteTaker](https://github.com/Wenbin-Feng/AI_NoteTaker).
+
 ## Run locally with uv
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
@@ -23,13 +25,21 @@ uv run python translator.py "Hello, world" --to 简体中文
 
 See [tutorial.md](tutorial.md) and [prompts/translate_prompt.md](prompts/translate_prompt.md).
 
-## Switch to Supabase later
+## Supabase and Vercel
 
-Create a Supabase Postgres project and copy its **Session Pooler** URI into `DATABASE_URL` in `.env`. Use a URL beginning `postgresql+psycopg://` and include `sslmode=require`. The server creates the notes table when it starts. Your local SQLite notes are **not** copied automatically; export/import them if you need to keep them. Keep this connection string server-side and out of Git.
+Fill the empty fields in `.env` using [DEPLOYMENT.md](DEPLOYMENT.md). This app connects directly to Supabase Postgres, so a Supabase anon key or service-role key is not required. The database connection automatically uses SSL and disables prepared statements for transaction pooling.
 
-## Vercel deployment preparation
+```sh
+uv run python manage.py check-config
+uv run python manage.py init-db
+uv run python manage.py check-config --live
+uv run python manage.py deploy
+uv run python manage.py smoke --translate
+```
 
-`api/index.py` and `vercel.json` contain the Python Function entry point and routing. Set `DATABASE_URL`, `LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` as Vercel project environment variables before deploying. Vercel requires Postgres because its local file system is ephemeral. A live public deployment cannot be verified until a Supabase project and Vercel project are supplied. For a public class demo, be aware that notes in this starter app are shared; it has no accounts or access control.
+`init-db` applies the repeatable SQL in `supabase/schema.sql`. Cloud startup does not create tables or write SQLite files. Local SQLite notes are retained locally and are not copied to Supabase automatically.
+
+`app.py` is the Flask entrypoint. Vercel serves the `public/` assets and routes API requests to the Python Function. The deploy command sends the four app runtime variables to Vercel Production through stdin, invokes Vercel CLI, and saves the resulting URL to `APP_URL`. Deployment tokens and IDs are only used by the local deployment tool. Notes in this class demo are shared; the app has no user accounts.
 
 ## Test
 
@@ -37,7 +47,7 @@ Create a Supabase Postgres project and copy its **Session Pooler** URI into `DAT
 uv run pytest -q
 ```
 
-The tests cover note CRUD, validation, translation success and failures using a mocked model response. The real OpenRouter endpoint may be temporarily busy or reject free-model traffic; the UI reports that error without losing the note.
+The tests cover note CRUD, validation, translation success and failures, database failures, cloud configuration, and the deployment command using mocked external services. `manage.py smoke` tests a running local or deployed instance, creates temporary test notes, then removes them. See [TESTING.md](TESTING.md) for the latest verification record.
 
 ## API
 

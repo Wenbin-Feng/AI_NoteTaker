@@ -1,4 +1,10 @@
 {
-  "builds": [{"src": "api/index.py", "use": "@vercel/python"}],
-  "routes": [{"src": "/(.*)", "dest": "api/index.py"}]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{"source": "/", "destination": "/index.html"}],
+  "functions": {
+    "app.py": {
+      "maxDuration": 90,
+      "excludeFiles": "{tests/**,scripts/**,database/**,supabase/**,submission/**,api/**,.env*,.venv/**,.pytest_cache/**}"
+    }
+  }
 }
